@@ -11,7 +11,9 @@
     "start": "ts-node src/worker.ts",
     "start.watch": "nodemon src/worker.ts",
     "workflow": "ts-node src/client.ts",
-    "test": "mocha --exit --require ts-node/register --require source-map-support/register src/mocha/*.test.ts"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "nodemonConfig": {
     "execMap": {
@@ -23,26 +25,30 @@
     ]
   },
   "dependencies": {
-    "@temporalio/activity": "^1.13.0",
+    "@anthropic-ai/sdk": "^0.65.0",
+    "@googlemaps/google-maps-services-js": "^3.4.2",
+    "@sendgrid/mail": "^8.1.6",
     "@temporalio/client": "^1.13.0",
     "@temporalio/worker": "^1.13.0",
     "@temporalio/workflow": "^1.13.0",
+    "dotenv": "^17.2.3",
     "nanoid": "3.x"
   },
   "devDependencies": {
     "@temporalio/testing": "^1.13.0",
-    "@types/mocha": "8.x",
+    "@tsconfig/node23": "^23.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.9.1",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-deprecation": "^3.0.0",
-    "mocha": "8.x",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.4.2",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3",
-    "@tsconfig/node23": "^23.0.0"
+    "typescript": "^5.6.3"
   }
 }

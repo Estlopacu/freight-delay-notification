@@ -1,37 +1,32 @@
 import { NativeConnection, Worker } from '@temporalio/worker';
-import * as activities from './activities';
+import * as trafficConditions from './traffic-conditions';
+import * as messageActivities from './message';
+import * as notificationActivities from './notifications';
+import 'dotenv/config';
+import { validateEnvironment, ENV_SETS } from './utils';
 
 async function run() {
-  // Step 1: Establish a connection with Temporal server.
-  //
-  // Worker code uses `@temporalio/worker.NativeConnection`.
-  // (But in your application code it's `@temporalio/client.Connection`.)
+  // Validate environment variables
+  validateEnvironment(ENV_SETS.ALL, 'the worker');
+
   const connection = await NativeConnection.connect({
     address: 'localhost:7233',
-    // TLS and gRPC metadata configuration goes here.
   });
+
   try {
-    // Step 2: Register Workflows and Activities with the Worker.
     const worker = await Worker.create({
       connection,
-      namespace: 'default',
-      taskQueue: 'hello-world',
-      // Workflows are registered using a path as they run in a separate JS context.
-      workflowsPath: require.resolve('./workflows'),
-      activities,
+      taskQueue: 'freight-delay-notification',
+      workflowsPath: require.resolve('./workflows/index'),
+      activities: {
+        ...trafficConditions,
+        ...messageActivities,
+        ...notificationActivities,
+      },
     });
 
-    // Step 3: Start accepting tasks on the `hello-world` queue
-    //
-    // The worker runs until it encounters an unexpected error or the process receives a shutdown signal registered on
-    // the SDK Runtime object.
-    //
-    // By default, worker logs are written via the Runtime logger to STDERR at INFO level.
-    //
-    // See https://typescript.temporal.io/api/classes/worker.Runtime#install to customize these defaults.
     await worker.run();
   } finally {
-    // Close the connection once the worker has stopped
     await connection.close();
   }
 }
