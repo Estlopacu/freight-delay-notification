@@ -19,9 +19,9 @@ async function simulateSendNotification(to: string, _message: string): Promise<v
 
     // This would actually call SendGrid - simulating failure
     if (attempt < maxAttempts) {
-      console.log(`   ❌ Failed: Rate limit exceeded (retry in ${attempt * 2}s)`);
+      console.log(`❌ Failed: Rate limit exceeded (retry in ${attempt * 2}s)`);
     } else {
-      console.log(`   ❌ Failed: Rate limit exceeded (max attempts reached)`);
+      console.log(`❌ Failed: Rate limit exceeded (max attempts reached)`);
       throw new Error('SendGrid API error: Daily email limit exceeded');
     }
   }
@@ -58,7 +58,9 @@ async function runNotificationFailureDemo() {
 
   console.log('\n🚦 Traffic Conditions (Simulated):');
   console.log(`   Distance: ${(trafficConditions.distance / METERS_TO_KILOMETERS).toFixed(1)} km`);
-  console.log(`   Normal duration: ${Math.round(trafficConditions.durationWithoutTraffic / SECONDS_TO_MINUTES)} minutes`);
+  console.log(
+    `   Normal duration: ${Math.round(trafficConditions.durationWithoutTraffic / SECONDS_TO_MINUTES)} minutes`,
+  );
   console.log(`   With traffic: ${Math.round(trafficConditions.durationInTraffic / SECONDS_TO_MINUTES)} minutes`);
   console.log(`   ⚠️  Delay detected: ${trafficConditions.delayInMinutes} minutes`);
 

@@ -9,7 +9,7 @@ This system demonstrates a real-world implementation of:
 - Multi-step workflow orchestration using Temporal
 - Real-time traffic monitoring with Google Maps API
 - AI-powered message generation using Anthropic's Claude
-- Email notifications with SendGrid (SMS fallback capability)
+- Email notifications with SendGrid
 - Comprehensive Jest testing suite
 
 ## Architecture
@@ -26,7 +26,7 @@ Workflows:
 Activities (External Interactions):
 ├── check-traffic-conditions.ts    - Google Maps API integration
 ├── generate-delay-message.ts      - Claude AI integration
-└── send-email-notification.ts     - SendGrid email/SMS delivery
+└── send-email-notification.ts     - SendGrid email delivery
 ```
 
 ## Prerequisites
@@ -113,25 +113,13 @@ npm test:coverage
 
 ### Example Test Scripts
 
-Test individual components:
-
-```bash
-# Test traffic monitoring
-ts-node src/examples/test-check-traffic.ts
-
-# Test email notifications
-ts-node src/examples/test-email-client.ts
-
-# Test notification failure scenarios
-ts-node src/examples/test-notification-failure.ts
-```
+For more details on the example scripts, see [src/examples/README.md](src/examples/README.md).
 
 ## Error Handling
 
 The application includes robust error handling:
 
 - Automatic retries for transient failures (configured via Temporal)
-- SMS fallback if email delivery fails
 - Fallback message generation if AI service is unavailable
 - Comprehensive error logging and reporting
 

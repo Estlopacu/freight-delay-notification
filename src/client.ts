@@ -9,7 +9,6 @@ import { ENV_SETS, validateEnvironment } from './utils/env-validation';
 async function run() {
   console.log('='.repeat(80));
   console.log('🚚 FREIGHT DELAY NOTIFICATION SYSTEM');
-  console.log('='.repeat(80));
 
   // Validate environment variables
   validateEnvironment(ENV_SETS.ALL, 'the client');
