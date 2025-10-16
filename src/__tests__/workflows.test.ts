@@ -17,6 +17,7 @@ describe('freightDelayNotification Workflow', () => {
 
   it('should not send notification when delay is below threshold', async () => {
     const { client, nativeConnection } = testEnv;
+    const delay = DELAY_THRESHOLD_MINUTES - 5;
 
     const worker = await Worker.create({
       connection: nativeConnection,
@@ -28,7 +29,7 @@ describe('freightDelayNotification Workflow', () => {
           durationWithoutTraffic: 3600,
           durationInTraffic: 5100, // 25 minutes delay (below 30 minute threshold)
           delayInSeconds: 1500,
-          delayInMinutes: 25,
+          delayInMinutes: delay,
           routeSummary: 'Test Route',
         }),
         generateDelayMessage: async () => 'Test message',
@@ -51,13 +52,14 @@ describe('freightDelayNotification Workflow', () => {
     if (result.notificationSent !== false) {
       throw new Error(`Expected notificationSent to be false, got ${result.notificationSent}`);
     }
-    if (result.trafficConditions.delayInMinutes !== 25) {
-      throw new Error(`Expected delay of 25 minutes, got ${result.trafficConditions.delayInMinutes}`);
+    if (result.trafficConditions.delayInMinutes !== delay) {
+      throw new Error(`Expected delay of ${delay} minutes, got ${result.trafficConditions.delayInMinutes}`);
     }
   }, 15000); // 15 second timeout for this test
 
   it('should detect delay when it exceeds threshold', async () => {
     const { client, nativeConnection } = testEnv;
+    const delay = DELAY_THRESHOLD_MINUTES + 5;
 
     const worker = await Worker.create({
       connection: nativeConnection,
@@ -69,7 +71,7 @@ describe('freightDelayNotification Workflow', () => {
           durationWithoutTraffic: 7200,
           durationInTraffic: 9600, // 40 minutes delay (exceeds 30 minute threshold)
           delayInSeconds: 2400,
-          delayInMinutes: 40,
+          delayInMinutes: delay,
           routeSummary: 'Delayed Route',
         }),
         generateDelayMessage: async () => 'Test delay message',
@@ -89,8 +91,8 @@ describe('freightDelayNotification Workflow', () => {
     if (result.delayDetected !== true) {
       throw new Error(`Expected delayDetected to be true, got ${result.delayDetected}`);
     }
-    if (result.trafficConditions.delayInMinutes !== 40) {
-      throw new Error(`Expected delay of 40 minutes, got ${result.trafficConditions.delayInMinutes}`);
+    if (result.trafficConditions.delayInMinutes !== delay) {
+      throw new Error(`Expected delay of ${delay} minutes, got ${result.trafficConditions.delayInMinutes}`);
     }
   }, 15000); // 15 second timeout for this test
 
@@ -107,7 +109,7 @@ describe('freightDelayNotification Workflow', () => {
           durationWithoutTraffic: 5400,
           durationInTraffic: 7200, // 30 minute delay (equals threshold)
           delayInSeconds: 1800,
-          delayInMinutes: 30,
+          delayInMinutes: DELAY_THRESHOLD_MINUTES,
           routeSummary: 'Threshold Route',
         }),
         generateDelayMessage: async () => 'Test threshold message',
@@ -123,7 +125,6 @@ describe('freightDelayNotification Workflow', () => {
       });
     });
 
-    // Should NOT detect delay since it only equals threshold (> comparison, not >=)
     if (result.delayDetected !== false) {
       throw new Error(`Expected delayDetected to be false for delay at threshold, got ${result.delayDetected}`);
     }
@@ -147,7 +148,7 @@ describe('freightDelayNotification Workflow', () => {
           durationWithoutTraffic: 7200,
           durationInTraffic: 9600, // 40 minutes delay (exceeds 30 minute threshold)
           delayInSeconds: 2400,
-          delayInMinutes: 40,
+          delayInMinutes: DELAY_THRESHOLD_MINUTES + 20,
           routeSummary: 'Delayed Route',
         }),
         generateDelayMessage: async () => 'Test delay message',

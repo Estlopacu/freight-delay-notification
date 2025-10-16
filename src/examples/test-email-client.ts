@@ -17,11 +17,6 @@ async function testEmailNotification() {
 
   if (apiKey === 'YOUR_SENDGRID_API_KEY_HERE') {
     console.error('\n❌ You need to replace the placeholder API key with your actual SendGrid API key.');
-    console.error('\n📝 Steps:');
-    console.error('   1. Go to https://app.sendgrid.com/settings/api_keys');
-    console.error('   2. Create a new API key');
-    console.error('   3. Copy the key and update your .env file');
-    console.error('\n📖 See SENDGRID_SETUP.md for detailed instructions');
     process.exit(1);
   }
 
@@ -61,18 +56,11 @@ Freight Delay Notification System`,
     await sendEmailNotification(testInput);
 
     console.log('\n✅ Email sent successfully!');
-    console.log('\n📬 Next steps:');
-    console.log('   1. Check your inbox at ' + recipientEmail);
-    console.log('   2. If not in inbox, check spam/junk folder');
-    console.log('   3. Mark as "Not Spam" if it\'s in spam folder');
-    console.log('\n💡 SendGrid Free Tier: 100 emails/day (no expiration)');
-    console.log('   You can send 99 more emails today!');
-    console.log('\n📊 Monitor usage at: https://app.sendgrid.com/');
     console.log('='.repeat(70));
   } catch (error) {
     console.error('\n❌ Failed to send email:');
     if (error instanceof Error) {
-      console.error(`   Error: ${error.message}`);
+      console.error(`Error: ${error.message}`);
 
       if (error.message.includes('credentials') || error.message.includes('Unauthorized')) {
         console.error('\n💡 Hint: Your API key may be invalid or expired.');
@@ -87,8 +75,6 @@ Freight Delay Notification System`,
         console.error('\n💡 Hint: Your API key may not have the correct permissions.');
         console.error('   Solution: Create a new API key with "Mail Send" or "Full Access" permissions.');
       }
-
-      console.error('\n📖 For more help, see SENDGRID_SETUP.md');
     } else {
       console.error(error);
     }

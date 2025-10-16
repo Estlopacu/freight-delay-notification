@@ -1,5 +1,5 @@
 import { NativeConnection, Worker } from '@temporalio/worker';
-import * as trafficConditions from './activities/check-traffic-conditions';
+import * as trafficActivities from './activities/check-traffic-conditions';
 import * as messageActivities from './activities/generate-delay-message';
 import * as notificationActivities from './activities/send-email-notification';
 import 'dotenv/config';
@@ -18,7 +18,7 @@ async function run() {
       taskQueue: 'freight-delay-notification',
       workflowsPath: require.resolve('./workflows/freight-delay-notification'),
       activities: {
-        ...trafficConditions,
+        ...trafficActivities,
         ...messageActivities,
         ...notificationActivities,
       },
