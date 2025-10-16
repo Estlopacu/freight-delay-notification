@@ -1,12 +1,11 @@
 import { NativeConnection, Worker } from '@temporalio/worker';
-import * as trafficConditions from './traffic-conditions';
-import * as messageActivities from './message';
-import * as notificationActivities from './notifications';
+import * as trafficConditions from './activities/check-traffic-conditions';
+import * as messageActivities from './activities/generate-delay-message';
+import * as notificationActivities from './activities/send-email-notification';
 import 'dotenv/config';
-import { validateEnvironment, ENV_SETS } from './utils';
+import { ENV_SETS, validateEnvironment } from './utils/env-validation';
 
 async function run() {
-  // Validate environment variables
   validateEnvironment(ENV_SETS.ALL, 'the worker');
 
   const connection = await NativeConnection.connect({
@@ -17,7 +16,7 @@ async function run() {
     const worker = await Worker.create({
       connection,
       taskQueue: 'freight-delay-notification',
-      workflowsPath: require.resolve('./workflows/index'),
+      workflowsPath: require.resolve('./workflows/freight-delay-notification'),
       activities: {
         ...trafficConditions,
         ...messageActivities,

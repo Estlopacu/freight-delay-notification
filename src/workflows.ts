@@ -1,39 +1,40 @@
 import { proxyActivities } from '@temporalio/workflow';
 // Only import the activity types
-import type * as trafficConditions from './traffic-conditions';
-import type * as messageActivities from './message';
-import type * as notificationActivities from './notifications';
-import type { DeliveryRoute, FreightDelayWorkflowResult } from './types';
-import { DELAY_THRESHOLD_MINUTES } from './constants';
+import type * as trafficConditions from './activities/check-traffic-conditions';
+import type * as messageActivities from './activities/generate-delay-message';
+import type * as notificationActivities from './activities/send-email-notification';
+import type { DeliveryRoute } from './types/delivery-route';
+import type { FreightDelayWorkflowResult } from './types/workflow';
+import {
+  DELAY_THRESHOLD_MINUTES,
+  TRAFFIC_CONDITIONS_TIMEOUT,
+  MESSAGE_GENERATION_TIMEOUT,
+  EMAIL_NOTIFICATION_TIMEOUT,
+  RETRY_INITIAL_INTERVAL,
+  RETRY_BACKOFF_COEFFICIENT,
+  RETRY_MAX_ATTEMPTS,
+  RETRY_MAX_INTERVAL,
+} from './constants';
 
 const { checkTrafficConditions } = proxyActivities<typeof trafficConditions>({
-  startToCloseTimeout: '2 minutes',
+  startToCloseTimeout: TRAFFIC_CONDITIONS_TIMEOUT,
 });
 
 const { generateDelayMessage } = proxyActivities<typeof messageActivities>({
-  startToCloseTimeout: '30 seconds',
+  startToCloseTimeout: MESSAGE_GENERATION_TIMEOUT,
 });
 
 const { sendEmailNotification } = proxyActivities<typeof notificationActivities>({
-  startToCloseTimeout: '30 seconds',
+  startToCloseTimeout: EMAIL_NOTIFICATION_TIMEOUT,
   retry: {
-    initialInterval: '1 second',
-    backoffCoefficient: 2,
-    maximumAttempts: 3,
-    maximumInterval: '10 seconds',
+    initialInterval: RETRY_INITIAL_INTERVAL,
+    backoffCoefficient: RETRY_BACKOFF_COEFFICIENT,
+    maximumAttempts: RETRY_MAX_ATTEMPTS,
+    maximumInterval: RETRY_MAX_INTERVAL,
     nonRetryableErrorTypes: ['Missing SendGrid environment variables'], // Don't retry config errors
   },
 });
 
-/**
- * Main workflow for freight delay notification
- *
- * Steps:
- * 1. Check traffic conditions
- * 2. Determine if delay exceeds threshold
- * 3. If yes, generate AI message
- * 4. Send email notification
- */
 export async function freightDelayNotification(route: DeliveryRoute): Promise<FreightDelayWorkflowResult> {
   // Step 1: Check traffic conditions using Google Maps API
   const trafficConditions = await checkTrafficConditions(route);

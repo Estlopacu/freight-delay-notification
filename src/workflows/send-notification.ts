@@ -1,13 +1,6 @@
-/**
- * Step 4: Send Email Notification
- *
- * This step sends the notification message to the customer via email using SendGrid.
- * Includes retry logic and error handling.
- */
-
 import { proxyActivities } from '@temporalio/workflow';
-import type * as notificationActivities from '../notifications';
-import type { DeliveryRoute } from '../types';
+import type * as notificationActivities from '../activities/send-email-notification';
+import type { DeliveryRoute } from '../types/delivery-route';
 
 const { sendEmailNotification } = proxyActivities<typeof notificationActivities>({
   startToCloseTimeout: '30 seconds',
@@ -21,19 +14,14 @@ const { sendEmailNotification } = proxyActivities<typeof notificationActivities>
 });
 
 export interface NotificationResult {
-  /** Whether the notification was sent successfully */
   sent: boolean;
-  /** Error message if sending failed */
   error?: string;
 }
 
 /**
  * Send email notification to the customer
  */
-export async function sendNotificationStep(
-  route: DeliveryRoute,
-  message: string,
-): Promise<NotificationResult> {
+export async function sendNotificationStep(route: DeliveryRoute, message: string): Promise<NotificationResult> {
   try {
     await sendEmailNotification({
       to: route.customerEmail,

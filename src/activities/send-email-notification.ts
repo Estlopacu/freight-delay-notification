@@ -1,18 +1,11 @@
 import sgMail from '@sendgrid/mail';
 
-export interface EmailNotificationInput {
+interface EmailNotificationInput {
   to: string;
   subject: string;
   message: string;
 }
 
-/**
- * Sends an email notification using SendGrid.
- *
- * Reads credentials from environment variables:
- * - SENDGRID_API_KEY
- * - SENDGRID_FROM_EMAIL (the 'from' email address)
- */
 export async function sendEmailNotification(input: EmailNotificationInput): Promise<void> {
   const { to, subject, message } = input;
 
@@ -24,11 +17,9 @@ export async function sendEmailNotification(input: EmailNotificationInput): Prom
   if (!fromEmail) missingVars.push('SENDGRID_FROM_EMAIL');
 
   if (missingVars.length > 0) {
-    // Throw an error that lists exactly which variables are missing
     throw new Error(`Missing SendGrid environment variables: ${missingVars.join(', ')}`);
   }
 
-  // TypeScript needs to know these are not undefined after the check
   sgMail.setApiKey(apiKey!);
 
   const mailOptions = {

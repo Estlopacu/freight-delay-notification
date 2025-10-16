@@ -1,10 +1,10 @@
 import { Connection, Client } from '@temporalio/client';
-import { freightDelayNotification } from './workflows/index';
+import { freightDelayNotification } from './workflows/freight-delay-notification';
 import 'dotenv/config';
 import { nanoid } from 'nanoid';
-import type { DeliveryRoute } from './types';
+import type { DeliveryRoute } from './types/delivery-route';
 import { DELAY_THRESHOLD_MINUTES } from './constants';
-import { validateEnvironment, ENV_SETS } from './utils';
+import { ENV_SETS, validateEnvironment } from './utils/env-validation';
 
 async function run() {
   console.log('='.repeat(80));
@@ -28,10 +28,6 @@ async function run() {
       console.error(`   Error: ${error.message}`);
     }
     console.error('\n💡 Make sure the Temporal server is running:');
-    console.error('   1. Open a new terminal');
-    console.error('   2. Run: temporal server start-dev');
-    console.error('   3. Wait for "Temporal server is running" message');
-    console.error('   4. Then run this client again');
     process.exit(1);
   }
 
@@ -49,13 +45,10 @@ async function run() {
     process.exit(1);
   }
 
-  // Example delivery route
-  // Try different routes to test with varying traffic conditions:
   const route: DeliveryRoute = {
     origin: 'Berlin, Germany',
-    destination: 'Milan, Italy',
+    destination: 'Madrid, Spain',
     customerName: 'Esteban',
-    // IMPORTANT: Replace with a real email address
     customerEmail: 'estlopacu@gmail.com', // <-- Replace with your email
   };
 
@@ -69,9 +62,6 @@ async function run() {
     workflowId: 'freight-delay-' + nanoid(),
   });
 
-  console.log(`Started workflow ${handle.workflowId}`);
-
-  // Wait for the result
   const result = await handle.result();
 
   console.log('\n=== Traffic Conditions ===');

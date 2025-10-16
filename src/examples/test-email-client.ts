@@ -1,17 +1,7 @@
-/**
- * Test client for email notification functionality
- *
- * This script tests the sendEmailNotification activity by sending a real email.
- * Make sure your SendGrid credentials are set in the .env file.
- *
- * Usage: ts-node src/test-email-client.ts [recipient-email]
- */
-
 import { config } from 'dotenv';
-import { sendEmailNotification } from './notifications';
-import { validateEnvironment, ENV_SETS } from './utils';
+import { sendEmailNotification } from '../activities/send-email-notification';
+import { validateEnvironment, ENV_SETS } from '../utils/env-validation';
 
-// Load environment variables
 config();
 
 async function testEmailNotification() {
@@ -35,7 +25,6 @@ async function testEmailNotification() {
     process.exit(1);
   }
 
-  // Get recipient email from command line or use from email as default
   const recipientEmail = process.argv[2] || fromEmail;
 
   try {
@@ -85,7 +74,6 @@ Freight Delay Notification System`,
     if (error instanceof Error) {
       console.error(`   Error: ${error.message}`);
 
-      // Provide helpful error messages
       if (error.message.includes('credentials') || error.message.includes('Unauthorized')) {
         console.error('\n💡 Hint: Your API key may be invalid or expired.');
         console.error('   Solution: Create a new API key at https://app.sendgrid.com/settings/api_keys');
@@ -108,30 +96,6 @@ Freight Delay Notification System`,
   }
 }
 
-// Show usage if --help is passed
-if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log(`
-Usage: ts-node src/test-email-client.ts [recipient-email]
-
-Examples:
-  ts-node src/test-email-client.ts
-    → Sends test email to your verified sender email
-
-  ts-node src/test-email-client.ts customer@example.com
-    → Sends test email to customer@example.com
-
-Options:
-  -h, --help    Show this help message
-
-Requirements:
-  - SENDGRID_API_KEY must be set in .env
-  - SENDGRID_FROM_EMAIL must be set in .env
-  - Sender email must be verified in SendGrid
-
-For setup instructions, see SENDGRID_SETUP.md
-  `);
-  process.exit(0);
-}
 
 // Run the test
 testEmailNotification();

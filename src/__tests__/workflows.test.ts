@@ -1,7 +1,7 @@
 import { TestWorkflowEnvironment } from '@temporalio/testing';
 import { Worker } from '@temporalio/worker';
-import { freightDelayNotification } from '../workflows';
-import type { DeliveryRoute } from '../types';
+import { freightDelayNotification } from '../workflows/freight-delay-notification';
+import type { DeliveryRoute } from '../types/delivery-route';
 import { DELAY_THRESHOLD_MINUTES } from '../constants';
 
 describe('freightDelayNotification Workflow', () => {
@@ -9,11 +9,11 @@ describe('freightDelayNotification Workflow', () => {
 
   beforeAll(async () => {
     testEnv = await TestWorkflowEnvironment.createLocal();
-  }, 30000); // 30 second timeout for setup
+  }, 30000);
 
   afterAll(async () => {
     await testEnv?.teardown();
-  }, 10000); // 10 second timeout for teardown
+  }, 10000);
 
   it('should not send notification when delay is below threshold', async () => {
     const { client, nativeConnection } = testEnv;
@@ -21,14 +21,14 @@ describe('freightDelayNotification Workflow', () => {
     const worker = await Worker.create({
       connection: nativeConnection,
       taskQueue: 'test-below-threshold',
-      workflowsPath: require.resolve('../workflows'),
+      workflowsPath: require.resolve('../workflows/freight-delay-notification'),
       activities: {
         checkTrafficConditions: async (_route: DeliveryRoute) => ({
           distance: 100000,
           durationWithoutTraffic: 3600,
-          durationInTraffic: 3840, // 4 minutes delay (below 5 minute threshold)
-          delayInSeconds: 240,
-          delayInMinutes: 4,
+          durationInTraffic: 5100, // 25 minutes delay (below 30 minute threshold)
+          delayInSeconds: 1500,
+          delayInMinutes: 25,
           routeSummary: 'Test Route',
         }),
         generateDelayMessage: async () => 'Test message',
@@ -51,10 +51,8 @@ describe('freightDelayNotification Workflow', () => {
     if (result.notificationSent !== false) {
       throw new Error(`Expected notificationSent to be false, got ${result.notificationSent}`);
     }
-    if (result.trafficConditions.delayInMinutes !== 4) {
-      throw new Error(
-        `Expected delay of 4 minutes, got ${result.trafficConditions.delayInMinutes}`
-      );
+    if (result.trafficConditions.delayInMinutes !== 25) {
+      throw new Error(`Expected delay of 25 minutes, got ${result.trafficConditions.delayInMinutes}`);
     }
   }, 15000); // 15 second timeout for this test
 
@@ -64,14 +62,14 @@ describe('freightDelayNotification Workflow', () => {
     const worker = await Worker.create({
       connection: nativeConnection,
       taskQueue: 'test-above-threshold',
-      workflowsPath: require.resolve('../workflows'),
+      workflowsPath: require.resolve('../workflows/freight-delay-notification'),
       activities: {
         checkTrafficConditions: async (_route: DeliveryRoute) => ({
           distance: 200000,
           durationWithoutTraffic: 7200,
-          durationInTraffic: 7800, // 10 minutes delay (above 5 minute threshold)
-          delayInSeconds: 600,
-          delayInMinutes: 10,
+          durationInTraffic: 9600, // 40 minutes delay (exceeds 30 minute threshold)
+          delayInSeconds: 2400,
+          delayInMinutes: 40,
           routeSummary: 'Delayed Route',
         }),
         generateDelayMessage: async () => 'Test delay message',
@@ -91,27 +89,25 @@ describe('freightDelayNotification Workflow', () => {
     if (result.delayDetected !== true) {
       throw new Error(`Expected delayDetected to be true, got ${result.delayDetected}`);
     }
-    if (result.trafficConditions.delayInMinutes !== 10) {
-      throw new Error(
-        `Expected delay of 10 minutes, got ${result.trafficConditions.delayInMinutes}`
-      );
+    if (result.trafficConditions.delayInMinutes !== 40) {
+      throw new Error(`Expected delay of 40 minutes, got ${result.trafficConditions.delayInMinutes}`);
     }
   }, 15000); // 15 second timeout for this test
 
-  it('should detect delay when it exactly equals threshold', async () => {
+  it('should NOT detect delay when it exactly equals threshold', async () => {
     const { client, nativeConnection } = testEnv;
 
     const worker = await Worker.create({
       connection: nativeConnection,
       taskQueue: 'test-at-threshold',
-      workflowsPath: require.resolve('../workflows'),
+      workflowsPath: require.resolve('../workflows/freight-delay-notification'),
       activities: {
         checkTrafficConditions: async (_route: DeliveryRoute) => ({
           distance: 150000,
           durationWithoutTraffic: 5400,
-          durationInTraffic: 5700, // Exactly 5 minutes delay
-          delayInSeconds: 300,
-          delayInMinutes: 5,
+          durationInTraffic: 7200, // 30 minute delay (equals threshold)
+          delayInSeconds: 1800,
+          delayInMinutes: 30,
           routeSummary: 'Threshold Route',
         }),
         generateDelayMessage: async () => 'Test threshold message',
@@ -127,18 +123,16 @@ describe('freightDelayNotification Workflow', () => {
       });
     });
 
-    // Should detect delay since it equals threshold (>= comparison)
-    if (result.delayDetected !== true) {
-      throw new Error(
-        `Expected delayDetected to be true for delay at threshold, got ${result.delayDetected}`
-      );
+    // Should NOT detect delay since it only equals threshold (> comparison, not >=)
+    if (result.delayDetected !== false) {
+      throw new Error(`Expected delayDetected to be false for delay at threshold, got ${result.delayDetected}`);
     }
     if (result.trafficConditions.delayInMinutes !== DELAY_THRESHOLD_MINUTES) {
       throw new Error(
-        `Expected delay of ${DELAY_THRESHOLD_MINUTES} minutes, got ${result.trafficConditions.delayInMinutes}`
+        `Expected delay of ${DELAY_THRESHOLD_MINUTES} minutes, got ${result.trafficConditions.delayInMinutes}`,
       );
     }
-  }, 15000); // 15 second timeout for this test
+  }, 15000);
 
   it('should handle email notification failure gracefully', async () => {
     const { client, nativeConnection } = testEnv;
@@ -146,19 +140,18 @@ describe('freightDelayNotification Workflow', () => {
     const worker = await Worker.create({
       connection: nativeConnection,
       taskQueue: 'test-email-failure',
-      workflowsPath: require.resolve('../workflows'),
+      workflowsPath: require.resolve('../workflows/freight-delay-notification'),
       activities: {
         checkTrafficConditions: async (_route: DeliveryRoute) => ({
           distance: 200000,
           durationWithoutTraffic: 7200,
-          durationInTraffic: 7800, // 10 minutes delay (above 5 minute threshold)
-          delayInSeconds: 600,
-          delayInMinutes: 10,
+          durationInTraffic: 9600, // 40 minutes delay (exceeds 30 minute threshold)
+          delayInSeconds: 2400,
+          delayInMinutes: 40,
           routeSummary: 'Delayed Route',
         }),
         generateDelayMessage: async () => 'Test delay message',
         sendEmailNotification: async () => {
-          // Simulate email failure
           throw new Error('SendGrid API error: Daily sending limit exceeded');
         },
       },
@@ -177,29 +170,20 @@ describe('freightDelayNotification Workflow', () => {
       throw new Error(`Expected delayDetected to be true, got ${result.delayDetected}`);
     }
 
-    // Should have generated a message
     if (!result.notificationMessage) {
       throw new Error('Expected notificationMessage to be present');
     }
 
-    // Should NOT have sent the notification
     if (result.notificationSent !== false) {
-      throw new Error(
-        `Expected notificationSent to be false when SMS fails, got ${result.notificationSent}`
-      );
+      throw new Error(`Expected notificationSent to be false when email fails, got ${result.notificationSent}`);
     }
 
-    // Should have an error message
     if (!result.notificationError) {
-      throw new Error('Expected notificationError to be present when SMS fails');
+      throw new Error('Expected notificationError to be present when email fails');
     }
 
-    // Verify error message is present and contains failure information
-    // Note: Temporal may wrap the error, so we just verify an error was captured
     if (result.notificationError.length < 10) {
-      throw new Error(
-        `Expected notificationError to contain meaningful error info, got: ${result.notificationError}`
-      );
+      throw new Error(`Expected notificationError to contain meaningful error info, got: ${result.notificationError}`);
     }
   }, 30000); // 30 second timeout for this test (includes retries)
 });

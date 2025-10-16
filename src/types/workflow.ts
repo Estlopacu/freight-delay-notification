@@ -1,35 +1,5 @@
-/**
- * Types for the freight delay notification system
- */
-
-/**
- * Represents a delivery route with origin and destination
- */
-export interface DeliveryRoute {
-  origin: string;
-  destination: string;
-  waypoints?: string[];
-  customerName?: string;
-  customerEmail: string;
-}
-
-/**
- * Traffic condition information from Google Maps
- */
-export interface TrafficConditions {
-  /** Distance in meters */
-  distance: number;
-  /** Duration without traffic in seconds */
-  durationWithoutTraffic: number;
-  /** Duration with current traffic in seconds */
-  durationInTraffic: number;
-  /** Delay in seconds caused by traffic */
-  delayInSeconds: number;
-  /** Delay in minutes caused by traffic */
-  delayInMinutes: number;
-  /** The route summary/description */
-  routeSummary: string;
-}
+import type { DeliveryRoute } from './delivery-route';
+import type { TrafficConditions } from './traffic-conditions';
 
 /**
  * Input parameters for the freight delay notification workflow

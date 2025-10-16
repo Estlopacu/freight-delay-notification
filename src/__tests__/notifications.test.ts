@@ -1,7 +1,6 @@
-import { sendEmailNotification } from '../notifications.js';
+import { sendEmailNotification } from '../activities/send-email-notification.js';
 import sgMail from '@sendgrid/mail';
 
-// Mock the entire SendGrid library before the tests
 jest.mock('@sendgrid/mail');
 
 const mockSgMail = sgMail as jest.Mocked<typeof sgMail>;
@@ -10,7 +9,6 @@ describe('sendEmailNotification Activity', () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    // Clear mocks before each test
     jest.clearAllMocks();
 
     // Mock environment variables
@@ -22,7 +20,6 @@ describe('sendEmailNotification Activity', () => {
   });
 
   afterEach(() => {
-    // Restore original environment variables
     process.env = originalEnv;
   });
 
@@ -39,10 +36,8 @@ describe('sendEmailNotification Activity', () => {
 
     await sendEmailNotification(input);
 
-    // Verify SendGrid API key was set
     expect(mockSgMail.setApiKey).toHaveBeenCalledWith('SG.test-api-key');
 
-    // Verify send was called with correct parameters
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         to: input.to,
@@ -50,12 +45,11 @@ describe('sendEmailNotification Activity', () => {
         subject: input.subject,
         text: input.message,
         html: expect.stringContaining('Delivery Delay Notification'),
-      })
+      }),
     );
   });
 
   it('should throw an error if required environment variables are missing', async () => {
-    // Unset one of the required variables
     delete process.env.SENDGRID_API_KEY;
 
     const input = {
@@ -64,9 +58,8 @@ describe('sendEmailNotification Activity', () => {
       message: 'This should fail.',
     };
 
-    // Expect the function to throw a specific error
     await expect(sendEmailNotification(input)).rejects.toThrow(
-      'Missing SendGrid environment variables: SENDGRID_API_KEY'
+      'Missing SendGrid environment variables: SENDGRID_API_KEY',
     );
   });
 
@@ -82,7 +75,6 @@ describe('sendEmailNotification Activity', () => {
       message: 'This will also fail.',
     };
 
-    // Expect the function to catch the SendGrid error and re-throw it
     await expect(sendEmailNotification(input)).rejects.toThrow(`Failed to send email: ${errorMessage}`);
   });
 
@@ -99,11 +91,10 @@ describe('sendEmailNotification Activity', () => {
 
     await sendEmailNotification(input);
 
-    // Verify HTML content includes the message with line breaks converted
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         html: expect.stringContaining('<br>'),
-      })
+      }),
     );
   });
 });

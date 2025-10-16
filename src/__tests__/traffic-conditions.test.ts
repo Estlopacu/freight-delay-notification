@@ -1,6 +1,6 @@
-import { checkTrafficConditions } from '../traffic-conditions';
+import { checkTrafficConditions } from '../activities/check-traffic-conditions';
 import { Client } from '@googlemaps/google-maps-services-js';
-import type { DeliveryRoute } from '../types';
+import type { DeliveryRoute } from '../types/delivery-route';
 
 jest.mock('@googlemaps/google-maps-services-js');
 
@@ -30,9 +30,9 @@ describe('checkTrafficConditions', () => {
             summary: 'I-95 N',
             legs: [
               {
-                distance: { value: 347540 }, // meters
-                duration: { value: 13260 }, // 221 minutes in seconds
-                duration_in_traffic: { value: 14280 }, // 238 minutes in seconds
+                distance: { value: 347540 },
+                duration: { value: 13260 },
+                duration_in_traffic: { value: 14280 },
               },
             ],
           },
@@ -125,7 +125,7 @@ describe('checkTrafficConditions', () => {
     delete process.env.GOOGLE_MAPS_API_KEY;
 
     await expect(checkTrafficConditions(mockRoute)).rejects.toThrow(
-      'GOOGLE_MAPS_API_KEY environment variable is not set'
+      'GOOGLE_MAPS_API_KEY environment variable is not set',
     );
   });
 
@@ -139,9 +139,7 @@ describe('checkTrafficConditions', () => {
 
     (Client.prototype.directions as jest.Mock) = jest.fn().mockResolvedValue(mockResponse);
 
-    await expect(checkTrafficConditions(mockRoute)).rejects.toThrow(
-      'Google Maps API error: ZERO_RESULTS'
-    );
+    await expect(checkTrafficConditions(mockRoute)).rejects.toThrow('Google Maps API error: ZERO_RESULTS');
   });
 
   it('should throw error when no routes are found', async () => {
@@ -155,17 +153,15 @@ describe('checkTrafficConditions', () => {
     (Client.prototype.directions as jest.Mock) = jest.fn().mockResolvedValue(mockResponse);
 
     await expect(checkTrafficConditions(mockRoute)).rejects.toThrow(
-      'No routes found for the given origin and destination'
+      'No routes found for the given origin and destination',
     );
   });
 
   it('should handle API request failure', async () => {
-    (Client.prototype.directions as jest.Mock) = jest
-      .fn()
-      .mockRejectedValue(new Error('Network error'));
+    (Client.prototype.directions as jest.Mock) = jest.fn().mockRejectedValue(new Error('Network error'));
 
     await expect(checkTrafficConditions(mockRoute)).rejects.toThrow(
-      'Failed to fetch traffic conditions: Network error'
+      'Failed to fetch traffic conditions: Network error',
     );
   });
 

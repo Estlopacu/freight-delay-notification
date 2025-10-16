@@ -1,12 +1,8 @@
 import { Client, TravelMode } from '@googlemaps/google-maps-services-js';
-import type { DeliveryRoute, TrafficConditions } from './types';
+import type { DeliveryRoute } from '../types/delivery-route';
+import type { TrafficConditions } from '../types/traffic-conditions';
 
-/**
- * Checks traffic conditions for a delivery route using Google Maps Directions API
- */
-export async function checkTrafficConditions(
-  route: DeliveryRoute
-): Promise<TrafficConditions> {
+export async function checkTrafficConditions(route: DeliveryRoute): Promise<TrafficConditions> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {

@@ -13,28 +13,19 @@
  * with each step isolated in its own module for maintainability.
  */
 
-import type { DeliveryRoute, FreightDelayWorkflowResult } from '../types';
-import { checkTrafficStep } from './step1-check-traffic';
-import { evaluateDelayThreshold } from './step2-evaluate-delay';
-import { generateMessageStep } from './step3-generate-message';
-import { sendNotificationStep } from './step4-send-notification';
+import type { DeliveryRoute } from '../types/delivery-route';
+import type { FreightDelayWorkflowResult } from '../types/workflow';
+import { checkTraffic } from './check-traffic';
+import { evaluateDelayThreshold } from './evaluate-delay';
+import { generateMessageStep } from './generate-message';
+import { sendNotificationStep } from './send-notification';
 
-/**
- * Main workflow for freight delay notification
- */
 export async function freightDelayNotification(route: DeliveryRoute): Promise<FreightDelayWorkflowResult> {
-  // ========================================
-  // STEP 1: Check traffic conditions
-  // ========================================
-  const trafficConditions = await checkTrafficStep(route);
+  const trafficConditions = await checkTraffic(route);
 
-  // ========================================
-  // STEP 2: Evaluate delay threshold
-  // ========================================
   const delayEvaluation = evaluateDelayThreshold(trafficConditions);
 
   if (!delayEvaluation.exceedsThreshold) {
-    // No significant delay - return early without sending notification
     return {
       delayDetected: false,
       trafficConditions,
@@ -42,18 +33,10 @@ export async function freightDelayNotification(route: DeliveryRoute): Promise<Fr
     };
   }
 
-  // ========================================
-  // STEP 3: Generate notification message
-  // ========================================
-  // Delay exceeds threshold - proceed with notification
   const notificationMessage = await generateMessageStep(route, trafficConditions);
 
-  // ========================================
-  // STEP 4: Send email notification
-  // ========================================
   const notificationResult = await sendNotificationStep(route, notificationMessage);
 
-  // Return complete workflow result
   return {
     delayDetected: true,
     trafficConditions,
