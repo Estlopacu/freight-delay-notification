@@ -19,7 +19,6 @@ The application follows Temporal's workflow and activity pattern:
 ```
 Workflows:
 ├── check-traffic.ts       - Traffic condition monitoring
-├── evaluate-delay.ts      - Delay threshold evaluation
 ├── generate-message.ts    - AI message generation
 └── send-notification.ts   - Notification delivery
 
@@ -27,6 +26,12 @@ Activities (External Interactions):
 ├── check-traffic-conditions.ts    - Google Maps API integration
 ├── generate-delay-message.ts      - Claude AI integration
 └── send-email-notification.ts     - SendGrid email delivery
+
+Utils (Business Logic):
+├── delay-evaluation.ts    - Delay threshold evaluation
+├── env-validation.ts      - Environment variable validation
+├── ai-message-prompt.ts   - AI prompt templates
+└── fallback-message.ts    - Fallback message generation
 ```
 
 ## Prerequisites

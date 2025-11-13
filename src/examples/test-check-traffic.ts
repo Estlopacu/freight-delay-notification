@@ -55,4 +55,5 @@ async function testCheckTraffic() {
 }
 
 // Run the test
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 testCheckTraffic();

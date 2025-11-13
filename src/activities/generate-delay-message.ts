@@ -8,26 +8,40 @@ export async function generateDelayMessage(input: MessageGenerationInput): Promi
 
   if (!apiKey) {
     console.log('No Anthropic API key found, using fallback message template');
-    return generateFallbackMessage(input);
+    // return generateFallbackMessage(input);
   }
 
   const prompt = getAIMessagePrompt(input);
 
-  try {
-    const anthropic = new Anthropic({
-      apiKey,
-    });
+  let retries = 0;
+  let anthropic, message;
 
-    const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 200,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-    });
+  try {
+    const getAiMessageCall = async () => {
+      anthropic = new Anthropic({
+        apiKey,
+      });
+
+      message = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 200,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      });
+
+      return message
+    };
+
+    if (!getAiMessageCall() && retries < 5) {
+      retries++;
+      
+    } else {
+      return generateFallbackMessage(input);
+    }
 
     const textContent = message.content.find((block) => block.type === 'text');
     if (!textContent || textContent.type !== 'text') {

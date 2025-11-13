@@ -15,8 +15,8 @@
 
 import type { DeliveryRoute } from '../types/delivery-route';
 import type { FreightDelayWorkflowResult } from '../types/workflow';
+import { evaluateDelayThreshold } from '../utils/delay-evaluation';
 import { checkTraffic } from './check-traffic';
-import { evaluateDelayThreshold } from './evaluate-delay';
 import { generateMessageStep } from './generate-message';
 import { sendNotificationStep } from './send-notification';
 

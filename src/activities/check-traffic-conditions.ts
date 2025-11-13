@@ -50,6 +50,7 @@ export async function checkTrafficConditions(route: DeliveryRoute): Promise<Traf
 
     return trafficConditions;
   } catch (error) {
+    // include a better logger, send errors to sentry
     if (error instanceof Error) {
       throw new Error(`Failed to fetch traffic conditions: ${error.message}`);
     }

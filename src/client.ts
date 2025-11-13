@@ -1,7 +1,7 @@
 import { Connection, Client } from '@temporalio/client';
 import { freightDelayNotification } from './workflows/freight-delay-notification';
 import 'dotenv/config';
-import { nanoid } from 'nanoid';
+import { randomUUID } from 'crypto';
 import type { DeliveryRoute } from './types/delivery-route';
 import { DELAY_THRESHOLD_MINUTES } from './constants';
 import { ENV_SETS, validateEnvironment } from './utils/env-validation';
@@ -58,7 +58,7 @@ async function run() {
   const handle = await client.workflow.start(freightDelayNotification, {
     taskQueue: 'freight-delay-notification',
     args: [route],
-    workflowId: 'freight-delay-' + nanoid(),
+    workflowId: 'freight-delay-' + randomUUID(), // updated to use crypto I dont not external package is required
   });
 
   const result = await handle.result();

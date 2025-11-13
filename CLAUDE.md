@@ -48,9 +48,8 @@ This application is now fully implemented with all four steps working end-to-end
 
 **Workflow Steps:**
 1. [src/workflows/check-traffic.ts](src/workflows/check-traffic.ts) - Traffic monitoring step
-2. [src/workflows/evaluate-delay.ts](src/workflows/evaluate-delay.ts) - Delay threshold evaluation
-3. [src/workflows/generate-message.ts](src/workflows/generate-message.ts) - AI message generation
-4. [src/workflows/send-notification.ts](src/workflows/send-notification.ts) - Notification delivery
+2. [src/workflows/generate-message.ts](src/workflows/generate-message.ts) - AI message generation
+3. [src/workflows/send-notification.ts](src/workflows/send-notification.ts) - Notification delivery
 
 ### Activities (External Service Integrations)
 
@@ -78,9 +77,14 @@ This application is now fully implemented with all four steps working end-to-end
 
 ### Configuration
 
+**Utilities and Business Logic:**
+- [src/utils/delay-evaluation.ts](src/utils/delay-evaluation.ts) - Delay threshold evaluation logic
+- [src/utils/env-validation.ts](src/utils/env-validation.ts) - Environment variable validation
+- [src/utils/ai-message-prompt.ts](src/utils/ai-message-prompt.ts) - AI prompt templates
+- [src/utils/fallback-message.ts](src/utils/fallback-message.ts) - Fallback message generation
+
 **Constants and Environment:**
 - [src/constants.ts](src/constants.ts) - Timeouts, retry policies, and thresholds
-- [src/utils/env-validation.ts](src/utils/env-validation.ts) - Environment variable validation
 - [.env](.env) - API keys for Google Maps, Anthropic, and SendGrid
 
 ### Testing
